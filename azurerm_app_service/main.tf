@@ -22,7 +22,7 @@ data "azurerm_key_vault_secret" "secret_sas_url" {
 }
 
 module "secrets_from_keyvault" {
-  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_secrets_from_keyvault?ref=v2.0.0"
+  source = "git::git@github.com:pagopa/io-infrastructure-modules-new.git//azurerm_secrets_from_keyvault?ref=172265872-fix-appservice-lifecycle"
 
   key_vault_id = var.app_settings_secrets.key_vault_id
   secrets_map  = var.app_settings_secrets.map
@@ -55,6 +55,7 @@ resource "azurerm_app_service" "app_service" {
   site_config {
     always_on       = var.always_on
     min_tls_version = "1.2"
+    scm_type        = "VSTSRM"
 
     dynamic "ip_restriction" {
       for_each = var.allowed_ips
@@ -109,12 +110,6 @@ resource "azurerm_app_service" "app_service" {
 
   tags = {
     environment = var.environment
-  }
-
-  lifecycle {
-    ignore_changes = [
-      site_config[0].virtual_network_name,
-    ]
   }
 }
 
